@@ -120,6 +120,14 @@
     }
     .btn-ghost:hover { background: var(--gray-mid); }
 
+    .btn-share {
+      background: #f0f7ff;
+      color: var(--blue);
+      border: 2px solid var(--blue);
+      font-weight: 700;
+    }
+    .btn-share:hover { background: #dbeeff; }
+
     .btn-mode {
       background: #fff;
       color: var(--text);
@@ -502,6 +510,7 @@
       <button class="btn btn-mode" id="mode-mc"><span class="mode-icon">✅</span>객관식 퀴즈</button>
       <button class="btn btn-mode" id="mode-fill"><span class="mode-icon">✏️</span>빈칸 채우기</button>
     </div>
+    <button class="btn btn-share" id="share-btn">🔗 이 단어 공유하기</button>
     <button class="btn btn-ghost" id="new-input-btn">새 단어 입력</button>
   </div>
 
@@ -738,6 +747,53 @@ function checkSaved() {
   $('load-divider').style.display = 'none';
   $('load-btn').style.display = 'none';
 }
+
+// ============================================================
+//  URL SHARE
+// ============================================================
+function wordsToHash(wordsArr) {
+  try {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(wordsArr))));
+  } catch(e) { return null; }
+}
+
+function hashToWords(hash) {
+  try {
+    return JSON.parse(decodeURIComponent(escape(atob(hash))));
+  } catch(e) { return null; }
+}
+
+function getShareURL() {
+  const base = location.href.split('#')[0];
+  return base + '#v=' + wordsToHash(words);
+}
+
+$('share-btn').addEventListener('click', () => {
+  const url = getShareURL();
+  if (navigator.share) {
+    navigator.share({ title: 'Poly Vocab 단어장', url });
+  } else {
+    navigator.clipboard.writeText(url).then(() => {
+      toast('링크 복사됨! 다른 기기에서 열면 바로 시작돼요 ✅', 3000);
+    }).catch(() => {
+      prompt('이 링크를 복사하세요:', url);
+    });
+  }
+});
+
+// URL에서 단어 자동 로드
+(function checkURLHash() {
+  const hash = location.hash;
+  if (!hash.startsWith('#v=')) return;
+  const encoded = hash.slice(3);
+  const parsed = hashToWords(encoded);
+  if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+    words = parsed;
+    localStorage.setItem(LS_KEY, JSON.stringify(words));
+    history.replaceState(null, '', location.pathname);
+    goModeSelect();
+  }
+})();
 
 $('load-btn').addEventListener('click', () => {
   try {
