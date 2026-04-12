@@ -580,7 +580,8 @@
     <div style="font-size:18px;font-weight:800;margin-bottom:6px;">📷 다른 기기로 공유</div>
     <div style="font-size:13px;color:#666;margin-bottom:16px;">카메라로 QR코드를 찍으면<br>단어장이 바로 열려요</div>
     <div id="qr-img" style="width:200px;height:200px;margin:0 auto;display:flex;align-items:center;justify-content:center;"></div>
-    <div style="margin-top:16px;">
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px;">
+      <button id="qr-copy" style="border:none;background:#4A90D9;color:#fff;border-radius:10px;padding:11px 24px;font-size:15px;font-weight:700;cursor:pointer;">🔗 링크 복사하기</button>
       <button id="qr-close" style="border:none;background:#f0f4f8;border-radius:10px;padding:10px 24px;font-size:15px;font-weight:700;cursor:pointer;color:#444;">닫기</button>
     </div>
   </div>
@@ -797,6 +798,16 @@ $('share-btn').addEventListener('click', () => {
 
 $('qr-close').addEventListener('click', () => {
   $('qr-modal').style.display = 'none';
+});
+
+$('qr-copy').addEventListener('click', () => {
+  const url = getShareURL();
+  navigator.clipboard.writeText(url).then(() => {
+    $('qr-copy').textContent = '✅ 복사됨!';
+    setTimeout(() => { $('qr-copy').textContent = '🔗 링크 복사하기'; }, 2500);
+  }).catch(() => {
+    prompt('이 링크를 복사해서 다른 기기 브라우저에 붙여넣기 하세요:', url);
+  });
 });
 
 $('qr-modal').addEventListener('click', (e) => {
