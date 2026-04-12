@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Poly Vocab</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue: #4A90D9;
+      --blue-dark: #3a7bc8;
+      --green: #4CAF50;
+      --red: #E53935;
+      --gray: #f5f5f5;
+      --gray-mid: #e0e0e0;
+      --gray-dark: #666;
+      --text: #222;
+      --radius: 14px;
+      --shadow: 0 2px 12px rgba(0,0,0,0.10);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f0f4f8;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 100vh;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* ---- Screens ---- */
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      padding: 24px 20px 32px;
+      animation: fadeIn 0.25s ease;
+    }
+    .screen.active { display: flex; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---- Header ---- */
+    .app-header {
+      background: var(--blue);
+      color: #fff;
+      padding: 18px 20px 14px;
+      flex-shrink: 0;
+    }
+    .app-header h1 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+    .app-header p {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    /* ---- Buttons ---- */
+    .btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: none;
+      border-radius: var(--radius);
+      padding: 14px 20px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, background 0.12s;
+      min-height: 52px;
+      width: 100%;
+      text-align: center;
+    }
+    .btn:active { transform: scale(0.97); }
+
+    .btn-primary {
+      background: var(--blue);
+      color: #fff;
+      box-shadow: 0 3px 10px rgba(74,144,217,0.35);
+    }
+    .btn-primary:hover { background: var(--blue-dark); }
+    .btn-primary:disabled {
+      background: var(--gray-mid);
+      color: var(--gray-dark);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
+    .btn-outline {
+      background: #fff;
+      color: var(--blue);
+      border: 2px solid var(--blue);
+    }
+    .btn-outline:hover { background: #eef5fc; }
+
+    .btn-ghost {
+      background: var(--gray);
+      color: var(--gray-dark);
+      font-weight: 600;
+    }
+    .btn-ghost:hover { background: var(--gray-mid); }
+
+    .btn-mode {
+      background: #fff;
+      color: var(--text);
+      border: 2px solid var(--gray-mid);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      font-size: 17px;
+      font-weight: 700;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: var(--shadow);
+    }
+    .btn-mode .mode-icon { font-size: 30px; }
+    .btn-mode:hover { border-color: var(--blue); color: var(--blue); }
+
+    /* ---- Toast ---- */
+    #toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #333;
+      color: #fff;
+      padding: 10px 22px;
+      border-radius: 24px;
+      font-size: 14px;
+      font-weight: 600;
+      z-index: 999;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      opacity: 0;
+      pointer-events: none;
+    }
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* ================ SCREEN 1: INPUT ================ */
+    #screen-input .section-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text);
+    }
+
+    .prompt-box {
+      background: var(--gray);
+      border-radius: var(--radius);
+      padding: 14px;
+      font-size: 13px;
+      color: #444;
+      line-height: 1.6;
+      margin-bottom: 12px;
+      border: 1px solid var(--gray-mid);
+    }
+
+    #input-area {
+      width: 100%;
+      min-height: 180px;
+      border: 2px solid var(--gray-mid);
+      border-radius: var(--radius);
+      padding: 14px;
+      font-size: 15px;
+      resize: vertical;
+      outline: none;
+      font-family: inherit;
+      color: var(--text);
+      transition: border-color 0.2s;
+      margin-bottom: 12px;
+    }
+    #input-area:focus { border-color: var(--blue); }
+    #input-area.valid { border-color: var(--green); }
+
+    .input-status {
+      font-size: 13px;
+      color: var(--gray-dark);
+      margin-bottom: 16px;
+      min-height: 18px;
+    }
+    .input-status.ok { color: var(--green); font-weight: 600; }
+    .input-status.err { color: var(--red); }
+
+    .divider {
+      text-align: center;
+      color: var(--gray-dark);
+      font-size: 13px;
+      margin: 16px 0;
+      position: relative;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: var(--gray-mid);
+    }
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    /* ================ SCREEN 2: MODE SELECT ================ */
+    #screen-mode .word-count {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--blue);
+      margin-bottom: 24px;
+      padding: 16px;
+      background: #eef5fc;
+      border-radius: var(--radius);
+    }
+
+    .mode-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    /* ================ SHARED QUIZ/CARD STYLES ================ */
+    .quiz-header {
+      margin-bottom: 16px;
+    }
+
+    .progress-bar-wrap {
+      background: var(--gray-mid);
+      border-radius: 99px;
+      height: 8px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--blue);
+      border-radius: 99px;
+      transition: width 0.4s ease;
+    }
+    .progress-label {
+      font-size: 13px;
+      color: var(--gray-dark);
+      text-align: right;
+    }
+
+    .back-btn {
+      background: none;
+      border: none;
+      color: var(--gray-dark);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 4px 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+    .back-btn:hover { color: var(--blue); }
+
+    /* ================ SCREEN 3a: FLASHCARD ================ */
+    .card-scene {
+      perspective: 900px;
+      margin: 0 auto 24px;
+      width: 100%;
+      max-width: 360px;
+      height: 220px;
+      cursor: pointer;
+    }
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.4,0.2,0.2,1);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+    .card-inner.flipped { transform: rotateY(180deg); }
+
+    .card-face {
+      position: absolute;
+      inset: 0;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .card-front {
+      background: #fff;
+      border: 2px solid var(--blue);
+    }
+    .card-back {
+      background: var(--blue);
+      color: #fff;
+      transform: rotateY(180deg);
+    }
+
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      opacity: 0.55;
+      margin-bottom: 10px;
+    }
+    .card-front .card-label { color: var(--blue); }
+    .card-definition {
+      font-size: 19px;
+      line-height: 1.5;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .card-word {
+      font-size: 34px;
+      font-weight: 900;
+      letter-spacing: -1px;
+    }
+    .card-tap-hint {
+      font-size: 12px;
+      color: var(--gray-dark);
+      margin-top: 8px;
+    }
+    .card-front .card-tap-hint { color: var(--blue); opacity: 0.5; }
+
+    .card-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .card-controls .btn { flex: 1; }
+    .card-progress {
+      text-align: center;
+      font-size: 14px;
+      color: var(--gray-dark);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .shuffle-btn {
+      background: none;
+      border: none;
+      font-size: 14px;
+      color: var(--gray-dark);
+      cursor: pointer;
+      padding: 8px 12px;
+      border-radius: 8px;
+    }
+    .shuffle-btn:hover { background: var(--gray); color: var(--blue); }
+
+    /* ================ SCREEN 3b/3c: QUIZ ================ */
+    .quiz-definition {
+      background: var(--gray);
+      border-radius: var(--radius);
+      padding: 18px;
+      font-size: 19px;
+      font-weight: 600;
+      line-height: 1.5;
+      text-align: center;
+      margin-bottom: 20px;
+      border-left: 4px solid var(--blue);
+    }
+
+    .choices-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .choice-btn {
+      background: #fff;
+      border: 2px solid var(--gray-mid);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      min-height: 52px;
+      text-align: left;
+    }
+    .choice-btn:hover:not(:disabled) {
+      border-color: var(--blue);
+      background: #eef5fc;
+    }
+    .choice-btn.correct {
+      border-color: var(--green);
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .choice-btn.wrong {
+      border-color: var(--red);
+      background: #ffebee;
+      color: #c62828;
+    }
+    .choice-btn:disabled { cursor: default; }
+
+    /* Fill in blank */
+    .fill-input-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    #fill-input {
+      flex: 1;
+      border: 2px solid var(--gray-mid);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      font-size: 20px;
+      font-weight: 700;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    #fill-input:focus { border-color: var(--blue); }
+    #fill-input.correct { border-color: var(--green); background: #e8f5e9; }
+    #fill-input.wrong { border-color: var(--red); background: #ffebee; }
+
+    .fill-feedback {
+      font-size: 17px;
+      font-weight: 700;
+      text-align: center;
+      min-height: 28px;
+      margin-bottom: 12px;
+    }
+    .fill-feedback.correct { color: var(--green); }
+    .fill-feedback.wrong { color: var(--red); }
+
+    /* ================ SCORE SCREEN ================ */
+    .score-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 16px;
+      padding: 32px 0;
+    }
+    .score-emoji { font-size: 72px; }
+    .score-title { font-size: 26px; font-weight: 900; }
+    .score-sub { font-size: 18px; color: var(--gray-dark); }
+    .score-detail { font-size: 15px; color: var(--gray-dark); margin-top: -8px; }
+    .score-actions { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 8px; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <div class="app-header">
+    <h1>📚 Poly Vocab</h1>
+    <p>폴리 영어학원 단어 플래시카드 &amp; 퀴즈</p>
+  </div>
+
+  <!-- ===== SCREEN 1: INPUT ===== -->
+  <div class="screen active" id="screen-input">
+    <p class="section-title">1단계 — AI 프롬프트 복사</p>
+    <div class="prompt-box" id="prompt-preview"></div>
+    <button class="btn btn-primary" id="copy-btn">📋 프롬프트 복사</button>
+
+    <div class="divider" style="margin-top:24px">2단계 — AI 결과 붙여넣기</div>
+
+    <textarea id="input-area" placeholder="AI 결과를 여기에 붙여넣으세요 (POLYVOCAB_V1 형식)"></textarea>
+    <div class="input-status" id="input-status"></div>
+    <button class="btn btn-primary" id="start-btn" disabled>시작하기 →</button>
+
+    <div class="divider" id="load-divider" style="display:none">또는</div>
+    <button class="btn btn-ghost" id="load-btn" style="display:none">💾 저장된 단어 불러오기</button>
+  </div>
+
+  <!-- ===== SCREEN 2: MODE SELECT ===== -->
+  <div class="screen" id="screen-mode">
+    <div class="word-count" id="word-count-label">단어 준비완료!</div>
+    <div class="mode-grid">
+      <button class="btn btn-mode" id="mode-flash"><span class="mode-icon">📇</span>낱말카드</button>
+      <button class="btn btn-mode" id="mode-mc"><span class="mode-icon">✅</span>객관식 퀴즈</button>
+      <button class="btn btn-mode" id="mode-fill"><span class="mode-icon">✏️</span>빈칸 채우기</button>
+    </div>
+    <button class="btn btn-ghost" id="new-input-btn">새 단어 입력</button>
+  </div>
+
+  <!-- ===== SCREEN 3a: FLASHCARD ===== -->
+  <div class="screen" id="screen-flash">
+    <button class="back-btn" id="flash-back">← 돌아가기</button>
+    <div class="card-progress" id="flash-progress">1 / 12</div>
+
+    <div class="card-scene" id="card-scene">
+      <div class="card-inner" id="card-inner">
+        <div class="card-face card-front">
+          <div class="card-label">Definition</div>
+          <div class="card-definition" id="card-def">definition here</div>
+          <div class="card-tap-hint">탭하여 뒤집기</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-label">Word</div>
+          <div class="card-word" id="card-word">word</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-controls">
+      <button class="btn btn-outline" id="flash-prev">◀ 이전</button>
+      <button class="btn btn-outline" id="flash-next">다음 ▶</button>
+    </div>
+    <button class="shuffle-btn" id="flash-shuffle">🔀 셔플</button>
+  </div>
+
+  <!-- ===== SCREEN 3b: MULTIPLE CHOICE ===== -->
+  <div class="screen" id="screen-mc">
+    <button class="back-btn" id="mc-back">← 돌아가기</button>
+    <div class="quiz-header">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="mc-bar"></div></div>
+      <div class="progress-label" id="mc-progress">0 / 0</div>
+    </div>
+    <div class="quiz-definition" id="mc-def">definition</div>
+    <div class="choices-grid" id="mc-choices"></div>
+    <!-- score screen injected here -->
+  </div>
+
+  <!-- ===== SCREEN 3c: FILL IN BLANK ===== -->
+  <div class="screen" id="screen-fill">
+    <button class="back-btn" id="fill-back">← 돌아가기</button>
+    <div class="quiz-header">
+      <div class="progress-bar-wrap"><div class="progress-bar-fill" id="fill-bar"></div></div>
+      <div class="progress-label" id="fill-progress">0 / 0</div>
+    </div>
+    <div class="quiz-definition" id="fill-def">definition</div>
+    <div class="fill-input-wrap">
+      <input type="text" id="fill-input" placeholder="단어를 입력하세요" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
+      <button class="btn btn-primary" id="fill-submit" style="width:auto;padding:14px 18px;">확인</button>
+    </div>
+    <div class="fill-feedback" id="fill-feedback"></div>
+    <!-- score injected here -->
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ============================================================
+//  CONSTANTS
+// ============================================================
+const PROMPT_TEXT = `이 사진은 영어 단어 시험지입니다.
+각 단어와 Definition을 추출해주세요.
+
+아래 형식으로만 출력하세요. 다른 설명 없이 코드만 출력:
+
+POLYVOCAB_V1
+WORD:단어|definition 원문 그대로
+...
+END
+
+규칙:
+- definition은 시험지에 적힌 영어 원문 그대로 사용
+- 한 줄에 단어 하나씩
+- WORD: 접두어 반드시 포함`;
+
+const LS_KEY = 'poly-vocab:v1:data';
+
+// ============================================================
+//  STATE
+// ============================================================
+let words = [];           // [{word, definition}]
+let flashOrder = [];      // indices into words[]
+let flashIdx = 0;
+let flashFlipped = false;
+
+let mcQueue = [];         // word objects for current mc session
+let mcIdx = 0;
+let mcWrong = [];
+let mcAnswered = false;
+
+let fillQueue = [];
+let fillIdx = 0;
+let fillWrong = [];
+let fillAnswered = false;
+
+// ============================================================
+//  HELPERS
+// ============================================================
+function $(id) { return document.getElementById(id); }
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  $(id).classList.add('active');
+}
+
+function toast(msg, dur = 2000) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ============================================================
+//  PARSER
+// ============================================================
+function parsePolyvocab(raw) {
+  const lines = raw.trim().split('\n').map(l => l.trim()).filter(Boolean);
+  const startIdx = lines.findIndex(l => l === 'POLYVOCAB_V1');
+  if (startIdx === -1) return null;
+
+  const result = [];
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line === 'END') break;
+    if (!line.startsWith('WORD:')) continue;
+    const content = line.slice(5);
+    // 첫 번째 | 기준으로만 분리 (definition에 |가 있을 수 있음)
+    const sepIdx = content.indexOf('|');
+    if (sepIdx === -1) continue;
+    const word = content.slice(0, sepIdx).trim();
+    const definition = content.slice(sepIdx + 1).trim();
+    if (!word || !definition) continue;
+    result.push({ word, definition });
+  }
+  return result.length > 0 ? result : null;
+}
+
+// 같은 세트 내 다른 단어에서 보기 4개를 뽑아 정답 포함 5개 셔플
+function generateChoices(wordObj, allWords) {
+  const others = allWords.filter(w => w.word !== wordObj.word);
+  const picked = shuffle(others).slice(0, 4).map(w => w.word);
+  picked.push(wordObj.word);
+  return shuffle(picked);
+}
+
+// ============================================================
+//  SCREEN 1 – INPUT
+// ============================================================
+$('prompt-preview').textContent = PROMPT_TEXT;
+
+$('copy-btn').addEventListener('click', () => {
+  navigator.clipboard.writeText(PROMPT_TEXT).then(() => {
+    toast('복사완료! ✅');
+    $('copy-btn').textContent = '✅ 복사완료!';
+    setTimeout(() => { $('copy-btn').textContent = '📋 프롬프트 복사'; }, 2500);
+  }).catch(() => {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = PROMPT_TEXT;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('복사완료! ✅');
+  });
+});
+
+const inputArea = $('input-area');
+const inputStatus = $('input-status');
+const startBtn = $('start-btn');
+
+function validateInput() {
+  const val = inputArea.value.trim();
+  if (!val) {
+    inputStatus.textContent = '';
+    inputStatus.className = 'input-status';
+    inputArea.classList.remove('valid');
+    startBtn.disabled = true;
+    return;
+  }
+  const parsed = parsePolyvocab(val);
+  if (parsed) {
+    inputStatus.textContent = `✅ ${parsed.length}개 단어 인식됨`;
+    inputStatus.className = 'input-status ok';
+    inputArea.classList.add('valid');
+    startBtn.disabled = false;
+  } else {
+    inputStatus.textContent = '⚠️ POLYVOCAB_V1 형식을 찾을 수 없습니다';
+    inputStatus.className = 'input-status err';
+    inputArea.classList.remove('valid');
+    startBtn.disabled = true;
+  }
+}
+
+inputArea.addEventListener('input', validateInput);
+
+startBtn.addEventListener('click', () => {
+  const parsed = parsePolyvocab(inputArea.value);
+  if (!parsed) return;
+  words = parsed;
+  localStorage.setItem(LS_KEY, JSON.stringify(words));
+  goModeSelect();
+});
+
+// Load saved
+function checkSaved() {
+  try {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        $('load-divider').style.display = '';
+        $('load-btn').style.display = '';
+        $('load-btn').textContent = `💾 저장된 단어 불러오기 (${parsed.length}개)`;
+        return;
+      }
+    }
+  } catch(e) {}
+  $('load-divider').style.display = 'none';
+  $('load-btn').style.display = 'none';
+}
+
+$('load-btn').addEventListener('click', () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY));
+    if (saved && saved.length > 0) {
+      words = saved;
+      goModeSelect();
+    }
+  } catch(e) { toast('저장된 데이터를 불러올 수 없습니다'); }
+});
+
+checkSaved();
+
+// ============================================================
+//  SCREEN 2 – MODE SELECT
+// ============================================================
+function goModeSelect() {
+  $('word-count-label').textContent = `🎉 ${words.length}개 단어 준비완료!`;
+  showScreen('screen-mode');
+}
+
+$('new-input-btn').addEventListener('click', () => {
+  inputArea.value = '';
+  validateInput();
+  checkSaved();
+  showScreen('screen-input');
+});
+
+$('mode-flash').addEventListener('click', startFlash);
+$('mode-mc').addEventListener('click', () => startMC(words));
+$('mode-fill').addEventListener('click', () => startFill(words));
+
+// ============================================================
+//  SCREEN 3a – FLASHCARD
+// ============================================================
+function startFlash() {
+  flashOrder = words.map((_, i) => i);
+  flashIdx = 0;
+  flashFlipped = false;
+  renderFlash();
+  showScreen('screen-flash');
+}
+
+function renderFlash() {
+  const w = words[flashOrder[flashIdx]];
+  $('card-def').textContent = w.definition;
+  $('card-word').textContent = w.word;
+  $('flash-progress').textContent = `${flashIdx + 1} / ${words.length}`;
+  // Reset flip
+  flashFlipped = false;
+  $('card-inner').classList.remove('flipped');
+}
+
+$('card-scene').addEventListener('click', () => {
+  flashFlipped = !flashFlipped;
+  $('card-inner').classList.toggle('flipped', flashFlipped);
+});
+
+$('flash-prev').addEventListener('click', () => {
+  if (flashIdx > 0) { flashIdx--; renderFlash(); }
+});
+$('flash-next').addEventListener('click', () => {
+  if (flashIdx < flashOrder.length - 1) { flashIdx++; renderFlash(); }
+  else { toast('마지막 카드입니다! 🎉'); }
+});
+$('flash-shuffle').addEventListener('click', () => {
+  flashOrder = shuffle(flashOrder);
+  flashIdx = 0;
+  renderFlash();
+  toast('🔀 섞었습니다!');
+});
+$('flash-back').addEventListener('click', goModeSelect);
+
+// ============================================================
+//  SCREEN 3b – MULTIPLE CHOICE
+// ============================================================
+function startMC(queue) {
+  mcQueue = shuffle([...queue]);
+  mcIdx = 0;
+  mcWrong = [];
+  renderMC();
+  showScreen('screen-mc');
+}
+
+function renderMC() {
+  // Remove any score screen
+  const old = $('mc-score');
+  if (old) old.remove();
+
+  const q = mcQueue[mcIdx];
+  const total = mcQueue.length;
+  const pct = (mcIdx / total) * 100;
+
+  $('mc-bar').style.width = pct + '%';
+  $('mc-progress').textContent = `${mcIdx} / ${total}`;
+  $('mc-def').textContent = q.definition;
+  mcAnswered = false;
+
+  const grid = $('mc-choices');
+  grid.innerHTML = '';
+
+  const choices = generateChoices(q, words);
+  choices.forEach(choice => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.textContent = choice;
+    btn.addEventListener('click', () => handleMCAnswer(choice, q.word, btn));
+    grid.appendChild(btn);
+  });
+}
+
+function handleMCAnswer(choice, answer, btn) {
+  if (mcAnswered) return;
+  mcAnswered = true;
+
+  const isCorrect = choice.toLowerCase() === answer.toLowerCase();
+  const allBtns = $('mc-choices').querySelectorAll('.choice-btn');
+  allBtns.forEach(b => {
+    b.disabled = true;
+    if (b.textContent.toLowerCase() === answer.toLowerCase()) b.classList.add('correct');
+  });
+
+  if (!isCorrect) {
+    btn.classList.add('wrong');
+    mcWrong.push(mcQueue[mcIdx]);
+  }
+
+  const delay = isCorrect ? 800 : 1500;
+  setTimeout(() => {
+    mcIdx++;
+    if (mcIdx < mcQueue.length) {
+      renderMC();
+    } else {
+      showMCScore();
+    }
+  }, delay);
+}
+
+function showMCScore() {
+  const total = mcQueue.length;
+  const correct = total - mcWrong.length;
+  const pct = Math.round((correct / total) * 100);
+
+  $('mc-bar').style.width = '100%';
+  $('mc-progress').textContent = `${total} / ${total}`;
+  $('mc-def').textContent = '';
+  $('mc-choices').innerHTML = '';
+
+  const div = document.createElement('div');
+  div.id = 'mc-score';
+  div.className = 'score-screen';
+  div.innerHTML = `
+    <div class="score-emoji">${scoreEmoji(pct)}</div>
+    <div class="score-title">${pct}점!</div>
+    <div class="score-sub">${correct} / ${total} 정답</div>
+    <div class="score-actions">
+      ${mcWrong.length > 0 ? `<button class="btn btn-primary" id="mc-retry">틀린 단어 다시 풀기 (${mcWrong.length}개)</button>` : ''}
+      <button class="btn btn-outline" id="mc-restart">처음부터 다시</button>
+      <button class="btn btn-ghost" id="mc-home">모드 선택으로</button>
+    </div>`;
+  $('screen-mc').appendChild(div);
+
+  if (mcWrong.length > 0) {
+    $('mc-retry').addEventListener('click', () => startMC(mcWrong));
+  }
+  $('mc-restart').addEventListener('click', () => startMC(words));
+  $('mc-home').addEventListener('click', goModeSelect);
+}
+
+$('mc-back').addEventListener('click', goModeSelect);
+
+// ============================================================
+//  SCREEN 3c – FILL IN BLANK
+// ============================================================
+function startFill(queue) {
+  fillQueue = shuffle([...queue]);
+  fillIdx = 0;
+  fillWrong = [];
+  renderFill();
+  showScreen('screen-fill');
+  setTimeout(() => $('fill-input').focus(), 150);
+}
+
+function renderFill() {
+  const old = $('fill-score');
+  if (old) old.remove();
+
+  const q = fillQueue[fillIdx];
+  const total = fillQueue.length;
+  const pct = (fillIdx / total) * 100;
+
+  $('fill-bar').style.width = pct + '%';
+  $('fill-progress').textContent = `${fillIdx} / ${total}`;
+  $('fill-def').textContent = q.definition;
+  $('fill-feedback').textContent = '';
+  $('fill-feedback').className = 'fill-feedback';
+
+  const inp = $('fill-input');
+  inp.value = '';
+  inp.className = '';
+  inp.disabled = false;
+  $('fill-submit').disabled = false;
+  fillAnswered = false;
+
+  setTimeout(() => inp.focus(), 100);
+}
+
+function handleFillAnswer() {
+  if (fillAnswered) {
+    // If already answered, act as "next"
+    fillIdx++;
+    if (fillIdx < fillQueue.length) { renderFill(); }
+    else { showFillScore(); }
+    return;
+  }
+
+  const inp = $('fill-input');
+  const userVal = inp.value.trim();
+  if (!userVal) return;
+
+  fillAnswered = true;
+  inp.disabled = true;
+  $('fill-submit').disabled = true;
+
+  const q = fillQueue[fillIdx];
+  const isCorrect = userVal.toLowerCase() === q.word.toLowerCase();
+
+  if (isCorrect) {
+    inp.classList.add('correct');
+    $('fill-feedback').textContent = '정답! ✅';
+    $('fill-feedback').className = 'fill-feedback correct';
+  } else {
+    inp.classList.add('wrong');
+    $('fill-feedback').textContent = `오답! 정답: ${q.word}`;
+    $('fill-feedback').className = 'fill-feedback wrong';
+    fillWrong.push(q);
+  }
+
+  // Show "next" on submit button
+  $('fill-submit').textContent = '다음 →';
+  $('fill-submit').disabled = false;
+}
+
+$('fill-submit').addEventListener('click', handleFillAnswer);
+$('fill-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') handleFillAnswer();
+});
+
+function showFillScore() {
+  const total = fillQueue.length;
+  const correct = total - fillWrong.length;
+  const pct = Math.round((correct / total) * 100);
+
+  $('fill-bar').style.width = '100%';
+  $('fill-progress').textContent = `${total} / ${total}`;
+  $('fill-def').textContent = '';
+  $('fill-input').style.display = 'none';
+  document.querySelector('.fill-input-wrap').style.display = 'none';
+  $('fill-feedback').textContent = '';
+
+  const div = document.createElement('div');
+  div.id = 'fill-score';
+  div.className = 'score-screen';
+  div.innerHTML = `
+    <div class="score-emoji">${scoreEmoji(pct)}</div>
+    <div class="score-title">${pct}점!</div>
+    <div class="score-sub">${correct} / ${total} 정답</div>
+    <div class="score-actions">
+      ${fillWrong.length > 0 ? `<button class="btn btn-primary" id="fill-retry">틀린 단어 다시 풀기 (${fillWrong.length}개)</button>` : ''}
+      <button class="btn btn-outline" id="fill-restart">처음부터 다시</button>
+      <button class="btn btn-ghost" id="fill-home">모드 선택으로</button>
+    </div>`;
+  $('screen-fill').appendChild(div);
+
+  if (fillWrong.length > 0) {
+    $('fill-retry').addEventListener('click', () => {
+      document.querySelector('.fill-input-wrap').style.display = '';
+      $('fill-input').style.display = '';
+      $('fill-submit').textContent = '확인';
+      startFill(fillWrong);
+    });
+  }
+  $('fill-restart').addEventListener('click', () => {
+    document.querySelector('.fill-input-wrap').style.display = '';
+    $('fill-input').style.display = '';
+    $('fill-submit').textContent = '확인';
+    startFill(words);
+  });
+  $('fill-home').addEventListener('click', goModeSelect);
+}
+
+$('fill-back').addEventListener('click', () => {
+  document.querySelector('.fill-input-wrap').style.display = '';
+  $('fill-input').style.display = '';
+  $('fill-submit').textContent = '확인';
+  goModeSelect();
+});
+
+// ============================================================
+//  UTILITIES
+// ============================================================
+function scoreEmoji(pct) {
+  if (pct === 100) return '🎉';
+  if (pct >= 80)  return '👍';
+  if (pct >= 60)  return '💪';
+  return '📚';
+}
+</script>
+</body>
+</html>
