@@ -402,10 +402,155 @@
     .divider::before { left: 0; }
     .divider::after { right: 0; }
 
+    /* ================ SCREEN: DAY SELECT ================ */
+    #screen-days .days-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    #screen-days .days-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    #screen-days .days-summary {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--blue);
+      background: #eef5fc;
+      padding: 5px 14px;
+      border-radius: 99px;
+    }
+
+    .days-select-all-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 10px 14px;
+      background: var(--gray);
+      border-radius: var(--radius);
+    }
+    .days-select-all-label {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .days-toggle-btn {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-family: inherit;
+    }
+    .days-toggle-btn:hover { background: #eef5fc; }
+
+    .days-list {
+      border: 2px solid var(--gray-mid);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 340px;
+    }
+
+    .day-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--gray-mid);
+      gap: 12px;
+      background: #fff;
+      cursor: pointer;
+      transition: background 0.12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .day-item:last-child { border-bottom: none; }
+    .day-item:active { background: #f8f9fa; }
+
+    /* Custom checkbox */
+    .day-checkbox {
+      width: 26px;
+      height: 26px;
+      border: 2.5px solid var(--gray-mid);
+      border-radius: 7px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .day-checkbox.checked {
+      border-color: var(--blue);
+      background: var(--blue);
+    }
+    .day-checkbox.checked::after {
+      content: '✓';
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .day-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .day-name {
+      font-size: 17px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .day-count {
+      font-size: 13px;
+      color: var(--gray-dark);
+      font-weight: 600;
+      margin-top: 1px;
+    }
+
+    .day-delete-btn {
+      background: none;
+      border: none;
+      font-size: 22px;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      line-height: 1;
+      transition: background 0.12s;
+      flex-shrink: 0;
+      color: var(--gray-dark);
+    }
+    .day-delete-btn:hover { background: #ffebee; color: var(--red); }
+
+    .days-empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--gray-dark);
+      font-size: 15px;
+    }
+
+    .days-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: auto;
+    }
+
     /* ================ SCREEN 2: MODE SELECT ================ */
     #screen-mode .word-count {
       text-align: center;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: 800;
       color: var(--blue);
       margin-bottom: 24px;
@@ -703,10 +848,6 @@
       </div>
     </div>
 
-    <!-- Saved words load button -->
-    <div class="divider" id="load-divider" style="display:none;">또는</div>
-    <button class="btn btn-ghost" id="load-btn" style="display:none;">💾 저장된 단어 불러오기</button>
-
     <!-- Manual input fallback -->
     <div class="manual-toggle">
       <button id="manual-toggle-btn">직접 입력 (구 방식)</button>
@@ -719,6 +860,29 @@
     </div>
   </div>
 
+  <!-- ===== SCREEN: DAY SELECT ===== -->
+  <div class="screen" id="screen-days">
+    <div class="days-header">
+      <span class="days-title">📅 Day 선택</span>
+      <span class="days-summary" id="days-summary">0개 단어</span>
+    </div>
+
+    <div class="days-select-all-row">
+      <label class="days-select-all-label" id="days-select-all-label">
+        <div class="day-checkbox" id="select-all-checkbox"></div>
+        전체 선택
+      </label>
+      <button class="days-toggle-btn" id="days-toggle-btn">전체 선택 / 해제</button>
+    </div>
+
+    <div class="days-list" id="days-list"></div>
+
+    <div class="days-actions">
+      <button class="btn btn-primary" id="days-study-btn">선택한 Day 공부하기</button>
+      <button class="btn btn-ghost" id="days-add-btn">+ 새 단어 추가</button>
+    </div>
+  </div>
+
   <!-- ===== SCREEN 2: MODE SELECT ===== -->
   <div class="screen" id="screen-mode">
     <div class="word-count" id="word-count-label">단어 준비완료!</div>
@@ -728,7 +892,7 @@
       <button class="btn btn-mode" id="mode-fill"><span class="mode-icon">✏️</span>빈칸 채우기</button>
     </div>
     <button class="btn btn-share" id="share-btn">📷 QR코드로 공유하기</button>
-    <button class="btn btn-ghost" id="new-input-btn">새 단어 입력</button>
+    <button class="btn btn-ghost" id="back-to-days-btn">← 돌아가기</button>
   </div>
 
   <!-- ===== SCREEN 3a: FLASHCARD ===== -->
@@ -822,7 +986,8 @@ END
 - 한 줄에 단어 하나씩
 - WORD: 접두어 반드시 포함`;
 
-const LS_KEY     = 'poly-vocab:v1:data';
+const LS_KEY_LEGACY = 'poly-vocab:v1:data';
+const LS_KEY_DAYS   = 'poly-vocab:v2:days';
 const GEMINI_API_KEY = 'AIzaSyDG6Iy6W0R3uc0g7CCYn0b7j8Gtuv5HPaw';
 const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
 const MAX_IMAGE_PX = 1024;
@@ -830,7 +995,9 @@ const MAX_IMAGE_PX = 1024;
 // ============================================================
 //  STATE
 // ============================================================
-let words = [];           // [{word, definition}]
+let words = [];           // [{word, definition}] — active study set
+let days  = [];           // [{day: N, words: [{word, definition}]}]
+let selectedDayNums = []; // day numbers currently selected for study
 let previewWords = [];    // pending confirmed words from AI
 let flashOrder = [];
 let flashIdx = 0;
@@ -870,6 +1037,60 @@ function shuffle(arr) {
     [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
+}
+
+// ============================================================
+//  DAYS STORAGE
+// ============================================================
+function loadDays() {
+  try {
+    const raw = localStorage.getItem(LS_KEY_DAYS);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch(e) {}
+  return [];
+}
+
+function saveDays(daysArr) {
+  localStorage.setItem(LS_KEY_DAYS, JSON.stringify(daysArr));
+}
+
+function nextDayNumber() {
+  if (days.length === 0) return 1;
+  return Math.max(...days.map(d => d.day)) + 1;
+}
+
+function addNewDay(wordList) {
+  const dayNum = nextDayNumber();
+  days.push({ day: dayNum, words: [...wordList] });
+  saveDays(days);
+  return dayNum;
+}
+
+function deleteDay(dayNum) {
+  days = days.filter(d => d.day !== dayNum);
+  saveDays(days);
+}
+
+// ============================================================
+//  MIGRATION: v1 → v2
+// ============================================================
+function migrateV1() {
+  try {
+    const legacy = localStorage.getItem(LS_KEY_LEGACY);
+    if (!legacy) return;
+    const parsed = JSON.parse(legacy);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      // Only migrate if v2 doesn't exist yet
+      const existing = localStorage.getItem(LS_KEY_DAYS);
+      if (!existing) {
+        saveDays([{ day: 1, words: parsed }]);
+      }
+      localStorage.removeItem(LS_KEY_LEGACY);
+    }
+  } catch(e) {}
 }
 
 // ============================================================
@@ -1089,9 +1310,12 @@ $('gallery-input').addEventListener('change', (e) => {
 // Preview actions
 $('preview-confirm-btn').addEventListener('click', () => {
   if (previewWords.length === 0) { toast('단어가 없습니다'); return; }
-  words = [...previewWords];
-  localStorage.setItem(LS_KEY, JSON.stringify(words));
-  goModeSelect();
+  const dayNum = addNewDay(previewWords);
+  previewWords = [];
+  $('preview-section').classList.remove('active');
+  $('error-box').classList.remove('active');
+  toast(`Day ${dayNum} 저장완료! (${days.find(d => d.day === dayNum).words.length}개)`, 2500);
+  goDaySelect();
 });
 
 $('preview-add-btn').addEventListener('click', () => {
@@ -1147,39 +1371,14 @@ inputArea.addEventListener('input', validateInput);
 startBtn.addEventListener('click', () => {
   const parsed = parsePolyvocab(inputArea.value);
   if (!parsed) return;
-  words = parsed;
-  localStorage.setItem(LS_KEY, JSON.stringify(words));
-  goModeSelect();
-});
-
-// ============================================================
-//  SAVED WORDS
-// ============================================================
-function checkSaved() {
-  try {
-    const saved = localStorage.getItem(LS_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        $('load-divider').style.display = '';
-        $('load-btn').style.display = '';
-        $('load-btn').textContent = `💾 저장된 단어 불러오기 (${parsed.length}개)`;
-        return;
-      }
-    }
-  } catch(e) {}
-  $('load-divider').style.display = 'none';
-  $('load-btn').style.display = 'none';
-}
-
-$('load-btn').addEventListener('click', () => {
-  try {
-    const saved = JSON.parse(localStorage.getItem(LS_KEY));
-    if (saved && saved.length > 0) {
-      words = saved;
-      goModeSelect();
-    }
-  } catch(e) { toast('저장된 데이터를 불러올 수 없습니다'); }
+  const dayNum = addNewDay(parsed);
+  inputArea.value = '';
+  validateInput();
+  manualOpen = false;
+  $('manual-input-section').classList.remove('active');
+  $('manual-toggle-btn').textContent = '직접 입력 (구 방식)';
+  toast(`Day ${dayNum} 저장완료! (${parsed.length}개)`, 2500);
+  goDaySelect();
 });
 
 // ============================================================
@@ -1234,44 +1433,155 @@ $('qr-modal').addEventListener('click', (e) => {
   if (e.target === $('qr-modal')) $('qr-modal').style.display = 'none';
 });
 
-// URL에서 단어 자동 로드
-(function checkURLHash() {
-  const hash = location.hash;
-  if (!hash.startsWith('#v=')) return;
-  const encoded = hash.slice(3);
-  const parsed = hashToWords(encoded);
-  if (parsed && Array.isArray(parsed) && parsed.length > 0) {
-    words = parsed;
-    localStorage.setItem(LS_KEY, JSON.stringify(words));
-    history.replaceState(null, '', location.pathname);
-    goModeSelect();
-  }
-})();
-
 // ============================================================
-//  INIT
+//  DAY SELECT SCREEN
 // ============================================================
-checkSaved();
-
-// ============================================================
-//  SCREEN 2 – MODE SELECT
-// ============================================================
-function goModeSelect() {
-  $('word-count-label').textContent = `🎉 ${words.length}개 단어 준비완료!`;
-  showScreen('screen-mode');
+function goDaySelect() {
+  days = loadDays();
+  renderDayList();
+  showScreen('screen-days');
 }
 
-$('new-input-btn').addEventListener('click', () => {
-  // Reset input screen state
+function renderDayList() {
+  const list = $('days-list');
+  list.innerHTML = '';
+
+  if (days.length === 0) {
+    list.innerHTML = '<div class="days-empty">저장된 Day가 없습니다.<br>단어를 추가해보세요!</div>';
+    $('days-summary').textContent = '0개 단어';
+    updateSelectAllCheckbox();
+    return;
+  }
+
+  // Default: all days selected if selectedDayNums is empty or has stale data
+  const validDayNums = days.map(d => d.day);
+  selectedDayNums = selectedDayNums.filter(n => validDayNums.includes(n));
+  if (selectedDayNums.length === 0) {
+    selectedDayNums = [...validDayNums];
+  }
+
+  days.forEach(dayObj => {
+    const isChecked = selectedDayNums.includes(dayObj.day);
+    const row = document.createElement('div');
+    row.className = 'day-item';
+    row.dataset.day = dayObj.day;
+    row.innerHTML = `
+      <div class="day-checkbox${isChecked ? ' checked' : ''}" data-day="${dayObj.day}"></div>
+      <div class="day-info">
+        <div class="day-name">Day ${dayObj.day}</div>
+        <div class="day-count">${dayObj.words.length}개 단어</div>
+      </div>
+      <button class="day-delete-btn" data-day="${dayObj.day}" title="삭제">🗑</button>
+    `;
+
+    // Row click toggles checkbox (but not when clicking delete)
+    row.addEventListener('click', (e) => {
+      if (e.target.classList.contains('day-delete-btn')) return;
+      toggleDaySelection(dayObj.day);
+    });
+
+    // Delete button
+    row.querySelector('.day-delete-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (confirm(`Day ${dayObj.day}을 삭제할까요? (${dayObj.words.length}개 단어)`)) {
+        deleteDay(dayObj.day);
+        selectedDayNums = selectedDayNums.filter(n => n !== dayObj.day);
+        days = loadDays();
+        renderDayList();
+        toast(`Day ${dayObj.day} 삭제됨`);
+      }
+    });
+
+    list.appendChild(row);
+  });
+
+  updateSummary();
+  updateSelectAllCheckbox();
+}
+
+function toggleDaySelection(dayNum) {
+  if (selectedDayNums.includes(dayNum)) {
+    selectedDayNums = selectedDayNums.filter(n => n !== dayNum);
+  } else {
+    selectedDayNums.push(dayNum);
+  }
+  // Update checkbox in DOM
+  const checkbox = document.querySelector(`.day-checkbox[data-day="${dayNum}"]`);
+  if (checkbox) checkbox.classList.toggle('checked', selectedDayNums.includes(dayNum));
+  updateSummary();
+  updateSelectAllCheckbox();
+}
+
+function updateSummary() {
+  const totalWords = days
+    .filter(d => selectedDayNums.includes(d.day))
+    .reduce((sum, d) => sum + d.words.length, 0);
+  $('days-summary').textContent = `선택됨: ${totalWords}개 단어`;
+}
+
+function updateSelectAllCheckbox() {
+  const allNums = days.map(d => d.day);
+  const allSelected = allNums.length > 0 && allNums.every(n => selectedDayNums.includes(n));
+  const cb = $('select-all-checkbox');
+  cb.classList.toggle('checked', allSelected);
+}
+
+$('days-toggle-btn').addEventListener('click', () => {
+  const allNums = days.map(d => d.day);
+  const allSelected = allNums.every(n => selectedDayNums.includes(n));
+  if (allSelected) {
+    selectedDayNums = [];
+  } else {
+    selectedDayNums = [...allNums];
+  }
+  renderDayList();
+});
+
+$('select-all-checkbox').addEventListener('click', (e) => {
+  e.stopPropagation();
+  const allNums = days.map(d => d.day);
+  const allSelected = allNums.every(n => selectedDayNums.includes(n));
+  if (allSelected) {
+    selectedDayNums = [];
+  } else {
+    selectedDayNums = [...allNums];
+  }
+  renderDayList();
+});
+
+$('days-study-btn').addEventListener('click', () => {
+  if (selectedDayNums.length === 0) { toast('공부할 Day를 선택해주세요'); return; }
+  // Merge selected days into words
+  words = [];
+  days.filter(d => selectedDayNums.includes(d.day)).forEach(d => {
+    words = [...words, ...d.words];
+  });
+  if (words.length === 0) { toast('선택한 Day에 단어가 없습니다'); return; }
+  goModeSelect();
+});
+
+$('days-add-btn').addEventListener('click', () => {
+  // Go to input screen, reset state
   inputArea.value = '';
   validateInput();
   $('preview-section').classList.remove('active');
   $('error-box').classList.remove('active');
   previewWords = [];
   setLoadingState(false);
-  checkSaved();
   showScreen('screen-input');
 });
+
+// ============================================================
+//  SCREEN 2 – MODE SELECT
+// ============================================================
+function goModeSelect() {
+  const dayNums = selectedDayNums.slice().sort((a, b) => a - b);
+  const dayLabel = dayNums.length > 0 ? `Day ${dayNums.join(', ')} 공부중` : '';
+  $('word-count-label').textContent = `🎉 ${dayLabel} (${words.length}개)`;
+  showScreen('screen-mode');
+}
+
+$('back-to-days-btn').addEventListener('click', goDaySelect);
 
 $('mode-flash').addEventListener('click', startFlash);
 $('mode-mc').addEventListener('click', () => startMC(words));
@@ -1548,6 +1858,40 @@ function scoreEmoji(pct) {
   if (pct >= 60)  return '💪';
   return '📚';
 }
+
+// ============================================================
+//  INIT
+// ============================================================
+(function init() {
+  // 1. Migrate v1 data to v2 if needed
+  migrateV1();
+
+  // 2. Check URL hash — temporary study session, no day assignment
+  const hash = location.hash;
+  if (hash.startsWith('#v=')) {
+    const encoded = hash.slice(3);
+    const parsed = hashToWords(encoded);
+    if (parsed && Array.isArray(parsed) && parsed.length > 0) {
+      words = parsed;
+      history.replaceState(null, '', location.pathname);
+      // Go directly to mode select (no day assignment for shared links)
+      selectedDayNums = [];
+      $('word-count-label').textContent = `🎉 공유된 단어 (${words.length}개)`;
+      showScreen('screen-mode');
+      return;
+    }
+  }
+
+  // 3. Load days from storage
+  days = loadDays();
+
+  // 4. If days exist, go to day select; otherwise show input
+  if (days.length > 0) {
+    selectedDayNums = [];
+    goDaySelect();
+  }
+  // else: default screen-input is already active
+})();
 </script>
 </body>
 </html>
