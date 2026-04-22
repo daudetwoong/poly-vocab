@@ -166,28 +166,201 @@
       opacity: 1;
     }
 
-    /* ================ SCREEN 1: INPUT ================ */
-    #screen-input .section-title {
-      font-size: 17px;
+    /* ================ SCREEN 1: INPUT (NEW PHOTO-FIRST) ================ */
+
+    /* Camera button */
+    .camera-btn-wrap {
+      margin-bottom: 16px;
+    }
+    #camera-input {
+      display: none;
+    }
+    .camera-btn-label {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #4A90D9 0%, #3a7bc8 100%);
+      color: #fff;
+      border-radius: 20px;
+      padding: 32px 20px;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(74,144,217,0.40);
+      transition: transform 0.12s, box-shadow 0.12s;
+      text-align: center;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .camera-btn-label:active { transform: scale(0.97); box-shadow: 0 2px 8px rgba(74,144,217,0.30); }
+    .camera-btn-icon { font-size: 52px; line-height: 1; }
+    .camera-btn-text { font-size: 20px; font-weight: 800; }
+    .camera-btn-sub { font-size: 14px; opacity: 0.85; font-weight: 500; }
+
+    /* Gallery link */
+    .gallery-link-row {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    #gallery-input { display: none; }
+    .gallery-link {
+      font-size: 14px;
+      color: var(--gray-dark);
+      cursor: pointer;
+      text-decoration: underline;
+      background: none;
+      border: none;
+      font-family: inherit;
+      padding: 4px;
+    }
+    .gallery-link:hover { color: var(--blue); }
+
+    /* Loading state */
+    #ai-loading {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 32px 0;
+      text-align: center;
+    }
+    #ai-loading.active { display: flex; }
+    .spinner {
+      width: 52px;
+      height: 52px;
+      border: 5px solid var(--gray-mid);
+      border-top-color: var(--blue);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--gray-dark);
+    }
+    .loading-sub {
+      font-size: 13px;
+      color: var(--gray-mid);
+    }
+
+    /* Preview list */
+    #preview-section {
+      display: none;
+    }
+    #preview-section.active { display: block; }
+    .preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .preview-title {
+      font-size: 16px;
       font-weight: 700;
-      margin-bottom: 10px;
       color: var(--text);
     }
-
-    .prompt-box {
-      background: var(--gray);
-      border-radius: var(--radius);
-      padding: 14px;
-      font-size: 13px;
-      color: #444;
-      line-height: 1.6;
-      margin-bottom: 12px;
-      border: 1px solid var(--gray-mid);
+    .preview-count {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--blue);
+      background: #eef5fc;
+      padding: 4px 12px;
+      border-radius: 99px;
     }
+    .preview-list {
+      border: 2px solid var(--gray-mid);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 16px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .preview-item {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--gray-mid);
+      gap: 10px;
+      background: #fff;
+    }
+    .preview-item:last-child { border-bottom: none; }
+    .preview-item-content { flex: 1; min-width: 0; }
+    .preview-word {
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--text);
+    }
+    .preview-def {
+      font-size: 13px;
+      color: var(--gray-dark);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .preview-remove-btn {
+      background: none;
+      border: none;
+      color: var(--gray-mid);
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+      flex-shrink: 0;
+      border-radius: 6px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .preview-remove-btn:hover { color: var(--red); background: #ffebee; }
 
+    /* Error box */
+    .error-box {
+      background: #ffebee;
+      border: 1.5px solid #ef9a9a;
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: #c62828;
+      font-weight: 600;
+      display: none;
+    }
+    .error-box.active { display: block; }
+
+    /* Manual input fallback */
+    .manual-toggle {
+      text-align: center;
+      margin-top: 8px;
+    }
+    #manual-toggle-btn {
+      background: none;
+      border: none;
+      color: var(--gray-dark);
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: underline;
+      padding: 4px;
+      font-family: inherit;
+    }
+    #manual-toggle-btn:hover { color: var(--blue); }
+
+    .manual-input-section {
+      display: none;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1.5px solid var(--gray-mid);
+    }
+    .manual-input-section.active { display: block; }
+    .manual-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gray-dark);
+      margin-bottom: 10px;
+    }
     #input-area {
       width: 100%;
-      min-height: 180px;
+      min-height: 160px;
       border: 2px solid var(--gray-mid);
       border-radius: var(--radius);
       padding: 14px;
@@ -201,7 +374,6 @@
     }
     #input-area:focus { border-color: var(--blue); }
     #input-area.valid { border-color: var(--green); }
-
     .input-status {
       font-size: 13px;
       color: var(--gray-dark);
@@ -211,6 +383,7 @@
     .input-status.ok { color: var(--green); font-weight: 600; }
     .input-status.err { color: var(--red); }
 
+    /* Load saved */
     .divider {
       text-align: center;
       color: var(--gray-dark);
@@ -487,20 +660,62 @@
     <p>폴리 영어학원 단어 플래시카드 &amp; 퀴즈</p>
   </div>
 
-  <!-- ===== SCREEN 1: INPUT ===== -->
+  <!-- ===== SCREEN 1: INPUT (PHOTO-FIRST) ===== -->
   <div class="screen active" id="screen-input">
-    <p class="section-title">1단계 — AI 프롬프트 복사</p>
-    <div class="prompt-box" id="prompt-preview"></div>
-    <button class="btn btn-primary" id="copy-btn">📋 프롬프트 복사</button>
 
-    <div class="divider" style="margin-top:24px">2단계 — AI 결과 붙여넣기</div>
+    <!-- Camera button (primary action) -->
+    <div class="camera-btn-wrap">
+      <input type="file" id="camera-input" accept="image/*" capture="environment">
+      <label for="camera-input" class="camera-btn-label">
+        <span class="camera-btn-icon">📷</span>
+        <span class="camera-btn-text">사진으로 단어 추가</span>
+        <span class="camera-btn-sub">카메라로 시험지를 찍으세요</span>
+      </label>
+    </div>
 
-    <textarea id="input-area" placeholder="AI 결과를 여기에 붙여넣으세요 (POLYVOCAB_V1 형식)"></textarea>
-    <div class="input-status" id="input-status"></div>
-    <button class="btn btn-primary" id="start-btn" disabled>시작하기 →</button>
+    <!-- Gallery / file upload fallback -->
+    <div class="gallery-link-row">
+      <input type="file" id="gallery-input" accept="image/*">
+      <label for="gallery-input" class="gallery-link">또는 갤러리에서 사진 선택</label>
+    </div>
 
-    <div class="divider" id="load-divider" style="display:none">또는</div>
-    <button class="btn btn-ghost" id="load-btn" style="display:none">💾 저장된 단어 불러오기</button>
+    <!-- Error box -->
+    <div class="error-box" id="error-box"></div>
+
+    <!-- Loading state -->
+    <div id="ai-loading">
+      <div class="spinner"></div>
+      <div class="loading-text">AI가 단어를 인식하고 있어요...</div>
+      <div class="loading-sub">잠시만 기다려주세요</div>
+    </div>
+
+    <!-- Preview section -->
+    <div id="preview-section">
+      <div class="preview-header">
+        <span class="preview-title">인식된 단어 목록</span>
+        <span class="preview-count" id="preview-count">0개</span>
+      </div>
+      <div class="preview-list" id="preview-list"></div>
+      <button class="btn btn-primary" id="preview-confirm-btn">확인 — 공부 시작!</button>
+      <div style="margin-top:10px;">
+        <button class="btn btn-ghost" id="preview-retry-btn">다시 찍기</button>
+      </div>
+    </div>
+
+    <!-- Saved words load button -->
+    <div class="divider" id="load-divider" style="display:none;">또는</div>
+    <button class="btn btn-ghost" id="load-btn" style="display:none;">💾 저장된 단어 불러오기</button>
+
+    <!-- Manual input fallback -->
+    <div class="manual-toggle">
+      <button id="manual-toggle-btn">직접 입력 (구 방식)</button>
+    </div>
+    <div class="manual-input-section" id="manual-input-section">
+      <div class="manual-label">POLYVOCAB_V1 형식 직접 붙여넣기</div>
+      <textarea id="input-area" placeholder="AI 결과를 여기에 붙여넣으세요 (POLYVOCAB_V1 형식)"></textarea>
+      <div class="input-status" id="input-status"></div>
+      <button class="btn btn-primary" id="start-btn" disabled>시작하기 →</button>
+    </div>
   </div>
 
   <!-- ===== SCREEN 2: MODE SELECT ===== -->
@@ -606,17 +821,21 @@ END
 - 한 줄에 단어 하나씩
 - WORD: 접두어 반드시 포함`;
 
-const LS_KEY = 'poly-vocab:v1:data';
+const LS_KEY     = 'poly-vocab:v1:data';
+const GEMINI_API_KEY = 'AIzaSyDG6Iy6W0R3uc0g7CCYn0b7j8Gtuv5HPaw';
+const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const MAX_IMAGE_PX = 1024;
 
 // ============================================================
 //  STATE
 // ============================================================
 let words = [];           // [{word, definition}]
-let flashOrder = [];      // indices into words[]
+let previewWords = [];    // pending confirmed words from AI
+let flashOrder = [];
 let flashIdx = 0;
 let flashFlipped = false;
 
-let mcQueue = [];         // word objects for current mc session
+let mcQueue = [];
 let mcIdx = 0;
 let mcWrong = [];
 let mcAnswered = false;
@@ -666,7 +885,6 @@ function parsePolyvocab(raw) {
     if (line === 'END') break;
     if (!line.startsWith('WORD:')) continue;
     const content = line.slice(5);
-    // 첫 번째 | 기준으로만 분리 (definition에 |가 있을 수 있음)
     const sepIdx = content.indexOf('|');
     if (sepIdx === -1) continue;
     const word = content.slice(0, sepIdx).trim();
@@ -677,7 +895,6 @@ function parsePolyvocab(raw) {
   return result.length > 0 ? result : null;
 }
 
-// 같은 세트 내 다른 단어에서 보기 4개를 뽑아 정답 포함 5개 셔플
 function generateChoices(wordObj, allWords) {
   const others = allWords.filter(w => w.word !== wordObj.word);
   const picked = shuffle(others).slice(0, 4).map(w => w.word);
@@ -686,30 +903,204 @@ function generateChoices(wordObj, allWords) {
 }
 
 // ============================================================
-//  SCREEN 1 – INPUT
+//  IMAGE RESIZE (canvas, client-side)
 // ============================================================
-$('prompt-preview').textContent = PROMPT_TEXT;
-
-$('copy-btn').addEventListener('click', () => {
-  navigator.clipboard.writeText(PROMPT_TEXT).then(() => {
-    toast('복사완료! ✅');
-    $('copy-btn').textContent = '✅ 복사완료!';
-    setTimeout(() => { $('copy-btn').textContent = '📋 프롬프트 복사'; }, 2500);
-  }).catch(() => {
-    // Fallback
-    const ta = document.createElement('textarea');
-    ta.value = PROMPT_TEXT;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    document.body.removeChild(ta);
-    toast('복사완료! ✅');
+function resizeImageToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > MAX_IMAGE_PX || height > MAX_IMAGE_PX) {
+          const ratio = Math.min(MAX_IMAGE_PX / width, MAX_IMAGE_PX / height);
+          width  = Math.round(width  * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width  = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        // Always output as jpeg for smaller size
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        const base64 = dataUrl.split(',')[1];
+        resolve(base64);
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
+}
+
+// ============================================================
+//  GEMINI VISION API
+// ============================================================
+async function callGeminiVision(base64Image) {
+  const response = await fetch(
+    `${GEMINI_ENDPOINT}?key=${encodeURIComponent(GEMINI_API_KEY)}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: PROMPT_TEXT },
+            { inlineData: { mimeType: 'image/jpeg', data: base64Image } }
+          ]
+        }]
+      })
+    }
+  );
+
+  if (!response.ok) {
+    let errMsg = `API 오류 (${response.status})`;
+    try {
+      const errData = await response.json();
+      const detail = errData?.error?.message || '';
+      if (response.status === 429) errMsg = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+      else if (detail) errMsg = detail;
+    } catch(_) {}
+    throw new Error(errMsg);
+  }
+
+  const data = await response.json();
+  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if (!text) throw new Error('AI 응답이 비어있습니다. 다시 시도해주세요.');
+  return text;
+}
+
+// ============================================================
+//  PHOTO PROCESSING FLOW
+// ============================================================
+function setLoadingState(active) {
+  if (active) {
+    $('ai-loading').classList.add('active');
+    $('preview-section').classList.remove('active');
+    $('error-box').classList.remove('active');
+    $('camera-btn-wrap').style.opacity = '0.4';
+    $('camera-btn-wrap').style.pointerEvents = 'none';
+    $('gallery-link-row').style.opacity = '0.4';
+    $('gallery-link-row').style.pointerEvents = 'none';
+    $('manual-toggle').style.display = 'none';
+  } else {
+    $('ai-loading').classList.remove('active');
+    $('camera-btn-wrap').style.opacity = '';
+    $('camera-btn-wrap').style.pointerEvents = '';
+    $('gallery-link-row').style.opacity = '';
+    $('gallery-link-row').style.pointerEvents = '';
+    $('manual-toggle').style.display = '';
+  }
+}
+
+function showError(msg) {
+  const box = $('error-box');
+  box.textContent = msg;
+  box.classList.add('active');
+  setLoadingState(false);
+}
+
+function renderPreview(wordList) {
+  previewWords = [...wordList];
+  $('preview-count').textContent = `${previewWords.length}개`;
+
+  const list = $('preview-list');
+  list.innerHTML = '';
+  previewWords.forEach((item, idx) => {
+    const div = document.createElement('div');
+    div.className = 'preview-item';
+    div.innerHTML = `
+      <div class="preview-item-content">
+        <div class="preview-word">${escapeHtml(item.word)}</div>
+        <div class="preview-def">${escapeHtml(item.definition)}</div>
+      </div>
+      <button class="preview-remove-btn" data-idx="${idx}" title="삭제">✕</button>
+    `;
+    list.appendChild(div);
+  });
+
+  // Attach remove handlers
+  list.querySelectorAll('.preview-remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const i = parseInt(btn.dataset.idx, 10);
+      previewWords.splice(i, 1);
+      renderPreview(previewWords);
+    });
+  });
+
+  $('preview-section').classList.add('active');
+  setLoadingState(false);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function processImageFile(file) {
+  if (!file) return;
+
+  $('error-box').classList.remove('active');
+  $('preview-section').classList.remove('active');
+  setLoadingState(true);
+
+  try {
+    const base64 = await resizeImageToBase64(file);
+    const rawText = await callGeminiVision(base64);
+    const parsed  = parsePolyvocab(rawText);
+
+    if (!parsed || parsed.length === 0) {
+      showError('⚠️ 단어를 인식하지 못했습니다. 시험지가 잘 보이는 사진으로 다시 시도해주세요.');
+      return;
+    }
+
+    renderPreview(parsed);
+  } catch (err) {
+    showError('❌ ' + (err.message || '알 수 없는 오류가 발생했습니다.'));
+  }
+}
+
+// File input handlers — both camera and gallery
+$('camera-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  processImageFile(file);
 });
 
-const inputArea = $('input-area');
+$('gallery-input').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  e.target.value = '';
+  processImageFile(file);
+});
+
+// Preview actions
+$('preview-confirm-btn').addEventListener('click', () => {
+  if (previewWords.length === 0) { toast('단어가 없습니다'); return; }
+  words = [...previewWords];
+  localStorage.setItem(LS_KEY, JSON.stringify(words));
+  goModeSelect();
+});
+
+$('preview-retry-btn').addEventListener('click', () => {
+  $('preview-section').classList.remove('active');
+  $('error-box').classList.remove('active');
+  previewWords = [];
+});
+
+// ============================================================
+//  MANUAL INPUT FALLBACK
+// ============================================================
+let manualOpen = false;
+$('manual-toggle-btn').addEventListener('click', () => {
+  manualOpen = !manualOpen;
+  $('manual-input-section').classList.toggle('active', manualOpen);
+  $('manual-toggle-btn').textContent = manualOpen ? '직접 입력 닫기' : '직접 입력 (구 방식)';
+});
+
+const inputArea   = $('input-area');
 const inputStatus = $('input-status');
-const startBtn = $('start-btn');
+const startBtn    = $('start-btn');
 
 function validateInput() {
   const val = inputArea.value.trim();
@@ -744,7 +1135,9 @@ startBtn.addEventListener('click', () => {
   goModeSelect();
 });
 
-// Load saved
+// ============================================================
+//  SAVED WORDS
+// ============================================================
 function checkSaved() {
   try {
     const saved = localStorage.getItem(LS_KEY);
@@ -761,6 +1154,16 @@ function checkSaved() {
   $('load-divider').style.display = 'none';
   $('load-btn').style.display = 'none';
 }
+
+$('load-btn').addEventListener('click', () => {
+  try {
+    const saved = JSON.parse(localStorage.getItem(LS_KEY));
+    if (saved && saved.length > 0) {
+      words = saved;
+      goModeSelect();
+    }
+  } catch(e) { toast('저장된 데이터를 불러올 수 없습니다'); }
+});
 
 // ============================================================
 //  URL SHARE
@@ -828,16 +1231,9 @@ $('qr-modal').addEventListener('click', (e) => {
   }
 })();
 
-$('load-btn').addEventListener('click', () => {
-  try {
-    const saved = JSON.parse(localStorage.getItem(LS_KEY));
-    if (saved && saved.length > 0) {
-      words = saved;
-      goModeSelect();
-    }
-  } catch(e) { toast('저장된 데이터를 불러올 수 없습니다'); }
-});
-
+// ============================================================
+//  INIT
+// ============================================================
 checkSaved();
 
 // ============================================================
@@ -849,8 +1245,13 @@ function goModeSelect() {
 }
 
 $('new-input-btn').addEventListener('click', () => {
+  // Reset input screen state
   inputArea.value = '';
   validateInput();
+  $('preview-section').classList.remove('active');
+  $('error-box').classList.remove('active');
+  previewWords = [];
+  setLoadingState(false);
   checkSaved();
   showScreen('screen-input');
 });
@@ -875,7 +1276,6 @@ function renderFlash() {
   $('card-def').textContent = w.definition;
   $('card-word').textContent = w.word;
   $('flash-progress').textContent = `${flashIdx + 1} / ${words.length}`;
-  // Reset flip
   flashFlipped = false;
   $('card-inner').classList.remove('flipped');
 }
@@ -912,7 +1312,6 @@ function startMC(queue) {
 }
 
 function renderMC() {
-  // Remove any score screen
   const old = $('mc-score');
   if (old) old.remove();
 
@@ -1036,7 +1435,6 @@ function renderFill() {
 
 function handleFillAnswer() {
   if (fillAnswered) {
-    // If already answered, act as "next"
     fillIdx++;
     if (fillIdx < fillQueue.length) { renderFill(); }
     else { showFillScore(); }
@@ -1065,7 +1463,6 @@ function handleFillAnswer() {
     fillWrong.push(q);
   }
 
-  // Show "next" on submit button
   $('fill-submit').textContent = '다음 →';
   $('fill-submit').disabled = false;
 }
