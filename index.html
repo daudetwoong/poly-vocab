@@ -696,9 +696,10 @@
         <span class="preview-count" id="preview-count">0개</span>
       </div>
       <div class="preview-list" id="preview-list"></div>
-      <button class="btn btn-primary" id="preview-confirm-btn">확인 — 공부 시작!</button>
-      <div style="margin-top:10px;">
-        <button class="btn btn-ghost" id="preview-retry-btn">다시 찍기</button>
+      <button class="btn btn-primary" id="preview-confirm-btn">반영하기 — 공부 시작!</button>
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button class="btn btn-outline" id="preview-add-btn" style="flex:1;">+ 사진 추가</button>
+        <button class="btn btn-ghost" id="preview-retry-btn" style="flex:1;">전체 초기화</button>
       </div>
     </div>
 
@@ -875,7 +876,9 @@ function shuffle(arr) {
 //  PARSER
 // ============================================================
 function parsePolyvocab(raw) {
-  const lines = raw.trim().split('\n').map(l => l.trim()).filter(Boolean);
+  // Strip markdown code blocks if present (```...```)
+  const cleaned = raw.replace(/```[\w]*\n?/g, '');
+  const lines = cleaned.trim().split('\n').map(l => l.trim()).filter(Boolean);
   const startIdx = lines.findIndex(l => l === 'POLYVOCAB_V1');
   if (startIdx === -1) return null;
 
@@ -967,7 +970,12 @@ async function callGeminiVision(base64Image) {
   }
 
   const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+  // Gemini 2.5 may return thinking parts — find the last text part (skip thought parts)
+  const parts = data?.candidates?.[0]?.content?.parts || [];
+  let text = '';
+  for (const p of parts) {
+    if (p.text && !p.thought) text = p.text;
+  }
   if (!text) throw new Error('AI 응답이 비어있습니다. 다시 시도해주세요.');
   return text;
 }
@@ -1042,7 +1050,6 @@ async function processImageFile(file) {
   if (!file) return;
 
   $('error-box').classList.remove('active');
-  $('preview-section').classList.remove('active');
   setLoadingState(true);
 
   try {
@@ -1055,7 +1062,12 @@ async function processImageFile(file) {
       return;
     }
 
-    renderPreview(parsed);
+    // Accumulate: merge new words into existing preview (skip duplicates)
+    const existing = new Set(previewWords.map(w => w.word.toLowerCase()));
+    const newWords = parsed.filter(w => !existing.has(w.word.toLowerCase()));
+    previewWords = [...previewWords, ...newWords];
+    renderPreview(previewWords);
+    toast(`${newWords.length}개 단어 추가 (총 ${previewWords.length}개)`);
   } catch (err) {
     showError('❌ ' + (err.message || '알 수 없는 오류가 발생했습니다.'));
   }
@@ -1080,6 +1092,11 @@ $('preview-confirm-btn').addEventListener('click', () => {
   words = [...previewWords];
   localStorage.setItem(LS_KEY, JSON.stringify(words));
   goModeSelect();
+});
+
+$('preview-add-btn').addEventListener('click', () => {
+  // Trigger camera for additional photo (keep existing previewWords)
+  $('camera-input').click();
 });
 
 $('preview-retry-btn').addEventListener('click', () => {
