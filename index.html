@@ -989,7 +989,12 @@ END
 const LS_KEY_LEGACY = 'poly-vocab:v1:data';
 const LS_KEY_DAYS   = 'poly-vocab:v2:days';
 const GEMINI_API_KEY = 'AIzaSyC-Uvvo_I6Qxeju7ZtBsSKDNXHHvG8kA1A';
-const GEMINI_ENDPOINT = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
+const GEMINI_MODELS = [
+  { name: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
+  { name: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+  { name: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash' },
+];
+const GEMINI_BASE_URL = 'https://generativelanguage.googleapis.com/v1beta/models';
 const MAX_IMAGE_PX = 1024;
 
 // ============================================================
@@ -1160,11 +1165,23 @@ function resizeImageToBase64(file) {
 }
 
 // ============================================================
-//  GEMINI VISION API
+//  GEMINI VISION API (with model fallback)
 // ============================================================
-async function callGeminiVision(base64Image) {
+function isRetryableError(status, msg) {
+  if (status === 429 || status === 503) return true;
+  if (msg && (msg.toLowerCase().includes('high demand') || msg.toLowerCase().includes('overloaded'))) return true;
+  return false;
+}
+
+function updateLoadingStatus(msg) {
+  const el = document.querySelector('.loading-sub');
+  if (el) el.textContent = msg;
+}
+
+async function callGeminiVisionSingle(base64Image, modelName) {
+  const endpoint = `${GEMINI_BASE_URL}/${modelName}:generateContent`;
   const response = await fetch(
-    `${GEMINI_ENDPOINT}?key=${encodeURIComponent(GEMINI_API_KEY)}`,
+    `${endpoint}?key=${encodeURIComponent(GEMINI_API_KEY)}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1181,17 +1198,19 @@ async function callGeminiVision(base64Image) {
 
   if (!response.ok) {
     let errMsg = `API 오류 (${response.status})`;
+    let detail = '';
     try {
       const errData = await response.json();
-      const detail = errData?.error?.message || '';
-      if (response.status === 429) errMsg = '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
-      else if (detail) errMsg = detail;
+      detail = errData?.error?.message || '';
+      if (detail) errMsg = detail;
     } catch(_) {}
-    throw new Error(errMsg);
+    const err = new Error(errMsg);
+    err.status = response.status;
+    err.retryable = isRetryableError(response.status, detail);
+    throw err;
   }
 
   const data = await response.json();
-  // Gemini 2.5 may return thinking parts — find the last text part (skip thought parts)
   const parts = data?.candidates?.[0]?.content?.parts || [];
   let text = '';
   for (const p of parts) {
@@ -1199,6 +1218,20 @@ async function callGeminiVision(base64Image) {
   }
   if (!text) throw new Error('AI 응답이 비어있습니다. 다시 시도해주세요.');
   return text;
+}
+
+async function callGeminiVision(base64Image) {
+  for (let i = 0; i < GEMINI_MODELS.length; i++) {
+    const model = GEMINI_MODELS[i];
+    try {
+      if (i > 0) updateLoadingStatus(`${model.label}(으)로 다시 시도 중...`);
+      return await callGeminiVisionSingle(base64Image, model.name);
+    } catch (err) {
+      const isLast = i === GEMINI_MODELS.length - 1;
+      if (isLast || !err.retryable) throw err;
+      console.warn(`[Poly Vocab] ${model.label} 실패: ${err.message}. 다음 모델로 전환.`);
+    }
+  }
 }
 
 // ============================================================
@@ -1272,6 +1305,7 @@ async function processImageFile(file) {
 
   $('error-box').classList.remove('active');
   setLoadingState(true);
+  updateLoadingStatus('잠시만 기다려주세요');
 
   try {
     const base64 = await resizeImageToBase64(file);
