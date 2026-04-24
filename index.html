@@ -809,7 +809,7 @@
   <div class="screen active" id="screen-input">
 
     <!-- Camera button (primary action) -->
-    <div class="camera-btn-wrap">
+    <div class="camera-btn-wrap" id="camera-btn-wrap">
       <input type="file" id="camera-input" accept="image/*" capture="environment">
       <label for="camera-input" class="camera-btn-label">
         <span class="camera-btn-icon">📷</span>
@@ -819,7 +819,7 @@
     </div>
 
     <!-- Gallery / file upload fallback -->
-    <div class="gallery-link-row">
+    <div class="gallery-link-row" id="gallery-link-row">
       <input type="file" id="gallery-input" accept="image/*">
       <label for="gallery-input" class="gallery-link">또는 갤러리에서 사진 선택</label>
     </div>
@@ -849,7 +849,7 @@
     </div>
 
     <!-- Manual input fallback -->
-    <div class="manual-toggle">
+    <div class="manual-toggle" id="manual-toggle">
       <button id="manual-toggle-btn">직접 입력 (구 방식)</button>
     </div>
     <div class="manual-input-section" id="manual-input-section">
