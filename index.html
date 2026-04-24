@@ -860,6 +860,11 @@
       </div>
     </div>
 
+    <!-- API key change link -->
+    <div style="text-align:center;margin-top:8px;">
+      <button id="api-key-change-btn" style="background:none;border:none;color:var(--gray-dark);font-size:13px;cursor:pointer;text-decoration:underline;">🔑 API 키 변경</button>
+    </div>
+
     <!-- Manual input fallback -->
     <div class="manual-toggle" id="manual-toggle">
       <button id="manual-toggle-btn">직접 입력 (구 방식)</button>
@@ -1938,11 +1943,23 @@ $('api-key-save-btn').addEventListener('click', () => {
   toast('API 키가 저장되었습니다!');
 });
 
+$('api-key-change-btn').addEventListener('click', () => {
+  localStorage.removeItem(LS_KEY_API);
+  $('api-key-input').value = '';
+  updateApiKeyUI();
+});
+
 // ============================================================
 //  INIT
 // ============================================================
 (function init() {
-  // 0. API key UI
+  // 0. URL param reset-key
+  if (location.search.includes('reset-key')) {
+    localStorage.removeItem(LS_KEY_API);
+    history.replaceState(null, '', location.pathname);
+  }
+
+  // 0b. API key UI
   updateApiKeyUI();
 
   // 1. Migrate v1 data to v2 if needed
