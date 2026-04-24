@@ -808,6 +808,18 @@
   <!-- ===== SCREEN 1: INPUT (PHOTO-FIRST) ===== -->
   <div class="screen active" id="screen-input">
 
+    <!-- API Key setup (shown only if no key saved) -->
+    <div id="api-key-section" style="display:none; margin-bottom:16px;">
+      <div style="background:#fff3cd;border-radius:12px;padding:14px 16px;border:1px solid #ffc107;">
+        <div style="font-weight:700;font-size:15px;margin-bottom:6px;">🔑 Gemini API 키 설정</div>
+        <div style="font-size:13px;color:#666;margin-bottom:10px;">
+          <a href="https://aistudio.google.com/apikey" target="_blank" style="color:var(--blue);">Google AI Studio</a>에서 무료 API 키를 발급받아 입력하세요. 한 번만 입력하면 저장됩니다.
+        </div>
+        <input type="text" id="api-key-input" placeholder="AIza..." style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:15px;margin-bottom:8px;">
+        <button class="btn btn-primary" id="api-key-save-btn" style="min-height:42px;font-size:14px;">키 저장하기</button>
+      </div>
+    </div>
+
     <!-- Camera button (primary action) -->
     <div class="camera-btn-wrap" id="camera-btn-wrap">
       <input type="file" id="camera-input" accept="image/*" capture="environment">
@@ -988,7 +1000,13 @@ END
 
 const LS_KEY_LEGACY = 'poly-vocab:v1:data';
 const LS_KEY_DAYS   = 'poly-vocab:v2:days';
-const GEMINI_API_KEY = 'AIzaSyC-Uvvo_I6Qxeju7ZtBsSKDNXHHvG8kA1A';
+const LS_KEY_API = 'poly-vocab:gemini-key';
+function getApiKey() {
+  return localStorage.getItem(LS_KEY_API) || '';
+}
+function setApiKey(key) {
+  localStorage.setItem(LS_KEY_API, key);
+}
 const GEMINI_MODELS = [
   { name: 'gemini-2.5-flash', label: 'Gemini 2.5 Flash' },
   { name: 'gemini-2.5-flash-lite', label: 'Gemini 2.5 Flash Lite' },
@@ -1181,7 +1199,7 @@ function updateLoadingStatus(msg) {
 async function callGeminiVisionSingle(base64Image, modelName) {
   const endpoint = `${GEMINI_BASE_URL}/${modelName}:generateContent`;
   const response = await fetch(
-    `${endpoint}?key=${encodeURIComponent(GEMINI_API_KEY)}`,
+    `${endpoint}?key=${encodeURIComponent(getApiKey())}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1302,6 +1320,11 @@ function escapeHtml(str) {
 
 async function processImageFile(file) {
   if (!file) return;
+  if (!getApiKey()) {
+    showError('🔑 먼저 Gemini API 키를 설정해주세요.');
+    updateApiKeyUI();
+    return;
+  }
 
   $('error-box').classList.remove('active');
   setLoadingState(true);
@@ -1894,9 +1917,34 @@ function scoreEmoji(pct) {
 }
 
 // ============================================================
+//  API KEY UI
+// ============================================================
+function updateApiKeyUI() {
+  const hasKey = !!getApiKey();
+  $('api-key-section').style.display = hasKey ? 'none' : 'block';
+  $('camera-btn-wrap').style.display = hasKey ? '' : 'none';
+  $('gallery-link-row').style.display = hasKey ? '' : 'none';
+  $('manual-toggle').style.display = hasKey ? '' : 'none';
+}
+
+$('api-key-save-btn').addEventListener('click', () => {
+  const key = $('api-key-input').value.trim();
+  if (!key || !key.startsWith('AIza')) {
+    toast('올바른 API 키를 입력해주세요 (AIza로 시작)');
+    return;
+  }
+  setApiKey(key);
+  updateApiKeyUI();
+  toast('API 키가 저장되었습니다!');
+});
+
+// ============================================================
 //  INIT
 // ============================================================
 (function init() {
+  // 0. API key UI
+  updateApiKeyUI();
+
   // 1. Migrate v1 data to v2 if needed
   migrateV1();
 
