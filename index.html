@@ -972,7 +972,7 @@
 <div id="toast"></div>
 
 <!-- QR Modal -->
-<div id="qr-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;display:none;align-items:center;justify-content:center;">
+<div id="qr-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:20px;padding:28px 24px;max-width:320px;width:90%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,0.25);">
     <div style="font-size:18px;font-weight:800;margin-bottom:6px;">📷 다른 기기로 공유</div>
     <div style="font-size:13px;color:#666;margin-bottom:16px;">카메라로 QR코드를 찍으면<br>단어장이 바로 열려요</div>
@@ -1255,6 +1255,7 @@ async function callGeminiVision(base64Image) {
       console.warn(`[Poly Vocab] ${model.label} 실패: ${err.message}. 다음 모델로 전환.`);
     }
   }
+  throw new Error('모든 AI 모델에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
 }
 
 // ============================================================
@@ -1930,6 +1931,7 @@ function updateApiKeyUI() {
   $('camera-btn-wrap').style.display = hasKey ? '' : 'none';
   $('gallery-link-row').style.display = hasKey ? '' : 'none';
   $('manual-toggle').style.display = hasKey ? '' : 'none';
+  $('api-key-change-btn').style.display = hasKey ? '' : 'none';
 }
 
 $('api-key-save-btn').addEventListener('click', () => {
